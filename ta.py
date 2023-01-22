@@ -76,35 +76,47 @@ try:
         # what happens when we have an error
         except ConnectionError as e:
             print("There was a ConnectionError", e)
+            pass
         except FileNotFoundError as e:
             print("There was a FileNotFoundError", e)
+            pass
         except KeyboardInterrupt as e:
             print("There was a KeyboardInterrupt", e)
+            pass
         except KeyError as e:
             print("There was a KeyError", e)
             pass
         except NameError as e:
             print("There was a NameError", e)
+            pass
         except IOError as e:
             print("There was a I/O error", e)
+            pass
         except RuntimeError as e:
             print("There was a RuntimeError", e)
+            pass
         except SyntaxError as e:
             print("There was a SyntaxError", e)
+            pass
         except SystemError as e:
             print("There was a SystemErrors", e)
+            pass
         except TypeError as e:
             print("There was a TypeError", e)
+            pass
         except ValueError as e:
             print("There was a ValueError", e)
+            pass
         except ZeroDivisionError as e:
             print("There was a ZeroDivisionError", e)
+            pass
         except:
             print("Exception ", sys.exc_info()[0], "occurred!")
             #
         else:  # what happens when we don't have an error
             #
-            print('No exception occured.')
+            print()
+            print('No exception occured for this ticker.')
             #
         finally:  # what happpens no matter what
             #print('Processing complete.')
@@ -115,7 +127,8 @@ except:
     #
 else:  # what happens when we don't have an error
     #
-    print('No exception occured.')
+    print("**************************")
+    print('No exception occured and was passed to top level try.')
     #
 finally:  # what happpens no matter what
     print('Processing complete.')
