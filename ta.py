@@ -1,6 +1,10 @@
+from datetime import datetime
+# import module sys to get the type of exception
+import sys, time
 import yfinance as yf
 import pandas_ta as ta
 import pandas as pd
+from yahoo_fin import stock_info as si
 
 # Define non-default RSI parameters
 rsi_period = 7
@@ -11,47 +15,108 @@ fast_period = 12
 slow_period = 26
 signal_period = 9
 #
+n = 0
 # Get Data
-ticker = yf.Ticker("AAL")
-df = ticker.history(period="1y")
-# 
-#print(df)
+stocklist = si.tickers_sp500()
+date = datetime.today().strftime('%Y-%m-%d-%H-%M')
 
-adx = ta.adx(df['High'], df['Low'], df['Close'])
+try:
 
-adx = df.ta.adx()
+    for stock in stocklist:
+        print('Process started.')
+        try:  # run the procedure inside of an error trap
+        #
+            n += 1
+            time.sleep(1)
 
-stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
+            print ("\npulling {} with index {}".format(stock, n))
+            ticker = yf.Ticker(stock)
+            df = ticker.history(period="1y")
+            # 
+            #print(df)
 
-macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
+            adx = ta.adx(df['High'], df['Low'], df['Close'])
 
-rsi = df.ta.rsi(rsi_period)
+            adx = df.ta.adx()
 
-df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
+            stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
 
-df = df[df['RSI_7'] < 30]
+            macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
 
-print(ticker)
-print()
-last_row = df.iloc[-1]
+            rsi = df.ta.rsi(rsi_period)
 
-if last_row['STOCHk_14_3_3'] >= 50:
-    message = f"!Possible Uptrend: The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
-    print(message)
-else:
-    message = f"The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
-    print(message)
-    
-if last_row['RSI_7'] >= 50:
-    message = f"!Possible Uptrend: The RSI_7 is {last_row['RSI_7']:.2f}"
-    print(message)
-else:
-    message = f"The RSI_7 is {last_row['RSI_7']:.2f}"
-    print(message)
+            df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
 
-if last_row['MACD_12_26_9'] > last_row['MACDs_12_26_9']:
-    message = f"!Possible Uptrend: The MACD > Sig is {last_row['MACD_12_26_9']:.2f}"
-    print(message)
-else:
-    message = f"The MACD_12_26_9 is {last_row['MACD_12_26_9']:.2f}"
-    print(message)
+            df = df[df['RSI_7'] < 30]
+
+            print()
+            last_row = df.iloc[-1]
+
+            if last_row['STOCHk_14_3_3'] >= 50:
+                message = f"!Possible Uptrend: The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
+                print(message)
+            else:
+                message = f"The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
+                print(message)
+
+            if last_row['RSI_7'] >= 50:
+                message = f"!Possible Uptrend: The RSI_7 is {last_row['RSI_7']:.2f}"
+                print(message)
+            else:
+                message = f"The RSI_7 is {last_row['RSI_7']:.2f}"
+                print(message)
+
+            if last_row['MACD_12_26_9'] > last_row['MACDs_12_26_9']:
+                message = f"!Possible Uptrend: The MACD > Sig is {last_row['MACD_12_26_9']:.2f}"
+                print(message)
+            else:
+                message = f"The MACD_12_26_9 is {last_row['MACD_12_26_9']:.2f}"
+                print(message)
+        #
+        # what happens when we have an error
+        except ConnectionError as e:
+            print("There was a ConnectionError", e)
+        except FileNotFoundError as e:
+            print("There was a FileNotFoundError", e)
+        except KeyboardInterrupt as e:
+            print("There was a KeyboardInterrupt", e)
+        except KeyError as e:
+            print("There was a KeyError", e)
+            pass
+        except NameError as e:
+            print("There was a NameError", e)
+        except IOError as e:
+            print("There was a I/O error", e)
+        except RuntimeError as e:
+            print("There was a RuntimeError", e)
+        except SyntaxError as e:
+            print("There was a SyntaxError", e)
+        except SystemError as e:
+            print("There was a SystemErrors", e)
+        except TypeError as e:
+            print("There was a TypeError", e)
+        except ValueError as e:
+            print("There was a ValueError", e)
+        except ZeroDivisionError as e:
+            print("There was a ZeroDivisionError", e)
+        except:
+            print("Exception ", sys.exc_info()[0], "occurred!")
+            #
+        else:  # what happens when we don't have an error
+            #
+            print('No exception occured.')
+            #
+        finally:  # what happpens no matter what
+            #print('Processing complete.')
+            #print(date)
+            pass
+except:
+    print("Exception ", sys.exc_info()[0], "occurred!")
+    #
+else:  # what happens when we don't have an error
+    #
+    print('No exception occured.')
+    #
+finally:  # what happpens no matter what
+    print('Processing complete.')
+    print(date)
