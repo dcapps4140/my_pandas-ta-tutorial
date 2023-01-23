@@ -5,7 +5,11 @@ import yfinance as yf
 import pandas_ta as ta
 import pandas as pd
 from yahoo_fin import stock_info as si
+from halo import Halo
 
+spinner = Halo(text='Loading', spinner='dots')
+# Set my_debug to = 1 to display verbose feedback
+my_debug = 0
 # Define non-default RSI parameters
 rsi_period = 7
 rsi_wilder = False
@@ -20,20 +24,25 @@ n = 0
 stocklist = si.tickers_sp500()
 date = datetime.today().strftime('%Y-%m-%d-%H-%M')
 
+print('Process started.')
+spinner.start()
 try:
-
     for stock in stocklist:
-        print('Process started.')
+
         try:  # run the procedure inside of an error trap
         #
             n += 1
             time.sleep(1)
 
-            print ("\npulling {} with index {}".format(stock, n))
+            if my_debug: 
+                print ("\nAnalyzing {} with iteration number {}".format(stock, n))
+            else:
+                print(n, end = "")
+
             ticker = yf.Ticker(stock)
             df = ticker.history(period="1y")
             # 
-            #print(df)
+            if my_debug:print(df)
 
             adx = ta.adx(df['High'], df['Low'], df['Close'])
 
@@ -49,29 +58,29 @@ try:
 
             df = df[df['RSI_7'] < 30]
 
-            print()
             last_row = df.iloc[-1]
+            if my_debug:print(last_row)
 
             if last_row['STOCHk_14_3_3'] >= 50:
                 message = f"!Possible Uptrend: The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
                 print(message)
-            else:
-                message = f"The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
-                print(message)
+            # else:
+            #     message = f"The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
+            #     print(message)
 
             if last_row['RSI_7'] >= 50:
                 message = f"!Possible Uptrend: The RSI_7 is {last_row['RSI_7']:.2f}"
                 print(message)
-            else:
-                message = f"The RSI_7 is {last_row['RSI_7']:.2f}"
-                print(message)
+            # else:
+            #     message = f"The RSI_7 is {last_row['RSI_7']:.2f}"
+            #     print(message)
 
             if last_row['MACD_12_26_9'] > last_row['MACDs_12_26_9']:
-                message = f"!Possible Uptrend: The MACD > Sig is {last_row['MACD_12_26_9']:.2f}"
+                message = ("!Possible Uptrend {} : The MACD > Sig is {}".format(stock, last_row['MACD_12_26_9']))
                 print(message)
-            else:
-                message = f"The MACD_12_26_9 is {last_row['MACD_12_26_9']:.2f}"
-                print(message)
+            # else:
+            #     message = f"The MACD_12_26_9 is {last_row['MACD_12_26_9']:.2f}"
+            #     print(message)
         #
         # what happens when we have an error
         except ConnectionError as e:
@@ -82,7 +91,9 @@ try:
             pass
         except KeyboardInterrupt as e:
             print("There was a KeyboardInterrupt", e)
-            pass
+            exception_message = f"Did user select  Ctrl-C? {e}"
+            sys.exit()
+            #pass
         except KeyError as e:
             print("There was a KeyError", e)
             pass
@@ -115,8 +126,8 @@ try:
             #
         else:  # what happens when we don't have an error
             #
-            print()
-            print('No exception occured for this ticker.')
+            #print('No exception occured for this ticker.')
+            exception_message = f"No exception occured for this many tickers {n:.2f}"
             #
         finally:  # what happpens no matter what
             #print('Processing complete.')
@@ -128,8 +139,10 @@ except:
 else:  # what happens when we don't have an error
     #
     print("**************************")
+    print(exception_message)
     print('No exception occured and was passed to top level try.')
     #
 finally:  # what happpens no matter what
-    print('Processing complete.')
+    spinner.stop()
+    print("Processing complete - ", exception_message)
     print(date)
