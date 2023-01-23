@@ -62,25 +62,25 @@ try:
             if my_debug:print(last_row)
 
             if last_row['STOCHk_14_3_3'] >= 50:
-                message = f"!Possible Uptrend: The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
-                print(message)
+                message1 = f"!Possible Uptrend: The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
+                print(message1)
             # else:
             #     message = f"The Stoch %k is {last_row['STOCHk_14_3_3']:.2f}"
-            #     print(message)
+            #     print(message1)
 
             if last_row['RSI_7'] >= 50:
-                message = f"!Possible Uptrend: The RSI_7 is {last_row['RSI_7']:.2f}"
-                print(message)
+                message2 = f"!Possible Uptrend: The RSI_7 is {last_row['RSI_7']:.2f}"
+                print(message2)
             # else:
             #     message = f"The RSI_7 is {last_row['RSI_7']:.2f}"
-            #     print(message)
+            #     print(message2)
 
             if last_row['MACD_12_26_9'] > last_row['MACDs_12_26_9']:
-                message = ("!Possible Uptrend {} : The MACD > Sig is {}".format(stock, last_row['MACD_12_26_9']))
-                print(message)
+                message3 = ("!Possible Uptrend {} : The MACD > Sig is {}".format(stock, last_row['MACD_12_26_9']))
+                print(message3)
             # else:
             #     message = f"The MACD_12_26_9 is {last_row['MACD_12_26_9']:.2f}"
-            #     print(message)
+            #     print(message3)
         #
         # what happens when we have an error
         except ConnectionError as e:
