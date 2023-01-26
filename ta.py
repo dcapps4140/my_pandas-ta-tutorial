@@ -152,19 +152,7 @@ try:
             #print('Processing complete.')
             #print(date)
             pass
-except:
-    print("Exception ", sys.exc_info()[0], "occurred!")
-    #
-else:  # what happens when we don't have an error
-    #
-    print("**************************")
-    print(exception_message)
-    print('No exception occured and was passed to top level try.')
-    #
-finally:  # what happpens no matter what
-    spinner.stop()
-    print("Processing complete - ", exception_message)
-    print(date)
+
 # record end time
 end = time.time()
 # print the difference between start
