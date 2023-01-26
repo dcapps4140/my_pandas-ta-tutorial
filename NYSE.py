@@ -1,28 +1,9 @@
-'''
-This code uses the yahoo_fin library to retrieve a list of all the symbols for the stocks traded on the NYSE, and then uses the yfinance library to 
-retrieve historical stock information for each symbol. The pandas_ta library is used to perform technical analysis on the data and add technical indicators to the dataframe. 
-The Halo library is used to display a spinning loading animation while the stock information is being retrieved.
-
-It then filters the dataframe for stocks that have a Stochastic %k greater than 50, RSI greater than 50, and MACD above the MACD signal, 
-and prints the symbol of the filtered stocks.
-
-It's worth noting that this code may take a while to run depending on the number of stocks in NYSE and the internet connection, 
-also it's important to note that this is only an example and the filtering conditions can be modified to fit your specific needs.
-
-Here is an example of how you can use the yfinance, pandas_ta, pandas, yahoo_fin, and halo libraries in Python to analyze all the stocks of the 
-New York Stock Exchange (NYSE) for stocks that have a Stochastic %k greater than 50, RSI greater than 50, and MACD above the MACD signal:
-'''
+import ta
 import pandas_ta as ta
-from datetime import datetime
-import sys, time
 import yfinance as yf
 import pandas as pd
 from yahoo_fin import stock_info as si
 from halo import Halo
-
-# record start time
-start = time.time()
-date = datetime.today().strftime('%Y-%m-%d-%H-%M')
 
 # gather stock symbols from major US exchanges
 df1 = pd.DataFrame( si.tickers_sp500() )
@@ -52,7 +33,6 @@ for symbol in symbols:
 
 print( f'Removed {len( del_set )} unqualified stock symbols...' )
 print( f'There are {len( sav_set )} qualified stock symbols...' )
-
 
 # Use the Halo library to display a spinning loading animation
 spinner = Halo(text='Retrieving stock information...', spinner='dots')
