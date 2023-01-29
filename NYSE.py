@@ -1,10 +1,10 @@
+import pyodbc
 import ta
 import pandas_ta as ta
 import yfinance as yf
 import pandas as pd
 from yahoo_fin import stock_info as si
 from halo import Halo
-import pyodbc
 
 #Define your database connection string parameters
 server = 'DESKTOP-7ARJ1N3\SQLEXPRESS'
