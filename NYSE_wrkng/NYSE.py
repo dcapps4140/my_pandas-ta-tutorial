@@ -133,9 +133,9 @@ try:
             first_record = cursor.fetchone()
             print('record found')
             try:
-
+                print(ticker.ticker)
                 # Execute the INSERT statement using cursor.execute() method
-                cursor.execute("IF NOT EXISTS (SELECT Symbol FROM StockData WHERE Symbol='{}')INSERT INTO dbo.StockData (Symbol) VALUES ('{}')".format(ticker))
+                cursor.execute("IF NOT EXISTS (SELECT Symbol FROM StockData WHERE Symbol='{}')INSERT INTO dbo.StockData (Symbol) VALUES ('{}')".format(ticker.ticker))
                 conn.commit()
                 print('Insert Executed')
             except pandas.io.sql.DatabaseError as e:
