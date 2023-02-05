@@ -114,18 +114,18 @@ try:
             df = ticker.history(period="1y")
             # print(df['Close'])
             last_row = df.iloc[-1]
-            if last_row['Close'] >= 5 and last_row['Close'] <= 20:
-                insert_sql = f"IF NOT EXISTS (SELECT Symbol FROM StockDatas WHERE Symbol='{ticker}') " \
-                 f"INSERT INTO StockSymbols (Symbol) VALUES ('{ticker}')"
-                cursor.execute(insert_sql)
-                print('in Close')
-                adx = ta.adx(df['High'], df['Low'], df['Close'])
-                adx = df.ta.adx()
-                stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
-                macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
-                rsi = df.ta.rsi(rsi_period)
-                df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
-                print('Post Concat')
+            # if last_row['Close'] >= 5 and last_row['Close'] <= 20:
+            #     insert_sql = f"IF NOT EXISTS (SELECT Symbol FROM StockDatas WHERE Symbol='{ticker}') " \
+            #      f"INSERT INTO StockSymbols (Symbol) VALUES ('{ticker}')"
+            #     cursor.execute(insert_sql)
+            #     print('in Close')
+            #     adx = ta.adx(df['High'], df['Low'], df['Close'])
+            #     adx = df.ta.adx()
+            #     stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
+            #     macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
+            #     rsi = df.ta.rsi(rsi_period)
+            #     df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
+            #     print('Post Concat')
             
             # Write to MSSQL Server table
             query = "SELECT TOP 1 * FROM StockData"
