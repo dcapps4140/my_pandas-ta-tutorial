@@ -13,11 +13,14 @@ server = 'DESKTOP-7ARJ1N3\SQLEXPRESS'
 database = 'stocks'
 table_name = 'StockSymbols'
 table_name_2 = 'StockData'
+table_name_3 = 'StockSymbClean'
 column_name = 'Symbol'
 username = 'vscode'
 password = 'development'
 
 date = datetime.today().strftime('%Y-%m-%d-%H-%M')
+#sys.stdout=open('output.log','w')
+sys.stderr=open('error.log','w')
 
 # Define non-default RSI parameters
 rsi_period = 7
@@ -96,7 +99,7 @@ if not table_exists(conn, table_name_2):
 df = pd.DataFrame()
 
 # Retrieve all stock ticker data from the NYSE
-cursor.execute("SELECT {} FROM {}".format(column_name, table_name_2))
+cursor.execute("SELECT {} FROM {}".format(column_name, table_name_3))
 stocklist = cursor.fetchall()
 
 #data is returned as a list of tuples, convert to list of lists
@@ -111,19 +114,20 @@ for stock in stocklist:
     print("Ticker = {}".format(stock))
     ticker = yf.Ticker(stock)
     df = ticker.history(period="1y")
-    # print(df['Close'])
     last_row = df.iloc[-1]
     if last_row['Close'] >= 5 and last_row['Close'] <= 20:
-
-        print('in Close')
-        adx = ta.adx(df['High'], df['Low'], df['Close'])
-        adx = df.ta.adx()
-        stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
-        macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
-        rsi = df.ta.rsi(rsi_period)
-        df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
-        df['Symbol'] = stock
-        print(df)
+        try:
+            adx = ta.adx(df['High'], df['Low'], df['Close'])
+            adx = df.ta.adx()
+            stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
+            macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
+            rsi = df.ta.rsi(rsi_period)
+            df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
+            df['Symbol'] = stock
+        except:
+            print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
+            pass
+        
         #Loop through the rows of the DataFrame
         for i, row in df.iterrows():
             # Create an INSERT statement for each row
@@ -139,19 +143,11 @@ for stock in stocklist:
                 cursor.execute(insert_stmt)
             except:
                 print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
-                #print('\n')
                 pass
 
             #Commit the changes to the database
             conn.commit()
-        print('\n', 'Post Concat')
-    
-    # Write to MSSQL Server table
-    query = "SELECT TOP 1 * FROM StockData"
-    cursor.execute(query)
-    first_record = cursor.fetchone()
-    print('record found')
-
+        print('\n', 'Post Insert')
 
 spinner.stop()
 print("Processing complete")
