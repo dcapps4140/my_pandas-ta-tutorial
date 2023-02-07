@@ -1,13 +1,15 @@
+"""This code is used to read an sql database create and write a
+Pandas DataFrame to a SQL database."""
 from datetime import datetime
-import pyodbc
-import sys
 import time
+import sys
+import logging
+from termcolor import colored
 import pandas_ta as ta
 import yfinance as yf
 import pandas as pd
 from halo import Halo
-from termcolor import colored
-import logging
+import pyodbc
 
 # set up logging to file - see previous section for more details
 logging.basicConfig(level=logging.DEBUG,
@@ -32,42 +34,46 @@ logger1 = logging.getLogger('myapp.area1')
 logger2 = logging.getLogger('myapp.area2')
 
 #Define your database connection string parameters
-server = 'DESKTOP-7ARJ1N3\SQLEXPRESS'
-database = 'stocks'
-table_name = 'StockSymbols'
-table_name_2 = 'StockData'
-table_name_3 = 'StockSymbClean'
-column_name = 'Symbol'
-username = 'vscode'
-password = 'development'
+SERVER = r'DESKTOP-7ARJ1N3\SQLEXPRESS'
+DATABASE = 'stocks'
+TABLE_NAME_1 = 'StockSymbols'
+TABLE_NAME_2 = 'StockData'
+TABLE_NAME_3 = 'StockSymbClean'
+COLUMN_NAME = 'Symbol'
+USERNAME = 'vscode'
+PASSWORD = 'development'
 
 date = datetime.today().strftime('%Y-%m-%d-%H-%M')
 
 # Define non-default RSI parameters
-rsi_period = 7
-rsi_wilder = False
+RSI_PERIOD = 7
+RSI_WILDER = False
 
 # Set custom MACD parameters
-fast_period = 12
-slow_period = 26
-signal_period = 9
+FAST_PERIOD = 12
+SLOW_PERIOD = 26
+SIGNAL_PERIOD = 9
 #
-def tuple_to_list(t):
-    return [list(x) for x in t]
+def tuple_to_list(my_tuples):
+    """Convert tuples to list of tuples"""
+    return [list(x) for x in my_tuples]
 
-def flatten(l):
-    return [item for sublist in l for item in sublist]
+def flatten(my_list):
+    """Flatten list of tuples"""
+    return [item for sublist in my_list for item in sublist]
 
 def database_exists(conn, db_name):
+    """Does table exist?"""
     cursor = conn.cursor()
-    cursor.execute("SELECT name from sys.databases WHERE name = '{}'".format(db_name))
+    cursor.execute(f"SELECT name from sys.databases WHERE name = '{db_name}'")
     result = cursor.fetchall()
     cursor.close()
     return len(result) > 0
 
 def table_exists(conn, table_name):
+    """Does table exist?"""
     cursor = conn.cursor()
-    cursor.execute("SELECT name from sys.tables WHERE name = '{}'".format(table_name))
+    cursor.execute(f"SELECT name from sys.tables WHERE name = '{TABLE_NAME_1}'")
     result = cursor.fetchall()
     cursor.close()
     return len(result) > 0
@@ -84,36 +90,35 @@ spinner = Halo(text='Retrieving stock information...', spinner='dots')
 # Define your database connection string
 # Connect to the database
 conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
-                    'SERVER=' + server + ';'
-                    'DATABASE=' + database + ';'
-                    'UID=' + username + ';'
-                    'PWD=' + password)
+                    'SERVER=' + SERVER + ';'
+                    'DATABASE=' + DATABASE + ';'
+                    'UID=' + USERNAME + ';'
+                    'PWD=' + PASSWORD)
 
 # Create a cursor
 cursor = conn.cursor()
 
 # Create a database and table for the stock symbols data
 # Create the database if it doesn't exist
-if not database_exists(conn, database):
+if not database_exists(conn, DATABASE):
     conn.autocommit = True
     cursor = conn.cursor()
-    cursor.execute("CREATE DATABASE {}".format(database))
-    cursor.close()
-    conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
-                          'SERVER=' + server + ';'
-                          'DATABASE=' + database + ';'
-                          'UID=' + username + ';'
-                          'PWD=' + password)
+    cursor.execute(f"CREATE DATABASE {DATABASE}")
+    Sonn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                          'SERVER=' + SERVER + ';'
+                          'DATABASE=' + DATABASE + ';'
+                          'UID=' + USERNAME + ';'
+                          'PWD=' + PASSWORD)
 
 # Create the table if it doesn't exist
-table_create_sql = "CREATE TABLE {} (Symbol varchar(10) NOT NULL PRIMARY KEY)".format(table_name)
-if not table_exists(conn, table_name):
+table_create_sql = f"CREATE TABLE {TABLE_NAME_1} (Symbol varchar(10) NOT NULL PRIMARY KEY)"
+if not table_exists(conn, TABLE_NAME_1):
     cursor = conn.cursor()
     cursor.execute(table_create_sql)
     cursor.close()
 
-table_create_sql = "CREATE TABLE {} (Symbol varchar(10) NOT NULL PRIMARY KEY)".format(table_name_2)
-if not table_exists(conn, table_name_2):
+table_create_sql = f"CREATE TABLE {TABLE_NAME_2} (Symbol varchar(10) NOT NULL PRIMARY KEY)"
+if not table_exists(conn, TABLE_NAME_2):
     cursor = conn.cursor()
     cursor.execute(table_create_sql)
     cursor.close()
@@ -122,7 +127,7 @@ if not table_exists(conn, table_name_2):
 df = pd.DataFrame()
 
 # Retrieve all stock ticker data from the NYSE
-cursor.execute("SELECT {} FROM {}".format(column_name, table_name_3))
+cursor.execute(f"SELECT {COLUMN_NAME} FROM {TABLE_NAME_3}")
 stocklist = cursor.fetchall()
 logger1.debug('Stocklist Built')
 
@@ -148,42 +153,34 @@ for stock in stocklist:
                 adx = ta.adx(df['High'], df['Low'], df['Close'])
                 adx = df.ta.adx()
                 stoch = ta.stoch(df['High'], df['Low'], df['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
-                macd = df.ta.macd(fast=fast_period, slow=slow_period, signal=signal_period)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
-                rsi = df.ta.rsi(rsi_period)
+                macd = df.ta.macd(fast=FAST_PERIOD, slow=SLOW_PERIOD, signal=SIGNAL_PERIOD)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
+                rsi = df.ta.rsi(RSI_PERIOD)
                 df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
                 df['Symbol'] = stock
             except:
                 print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
                 logger2.warning(sys.exc_info()[0])
-                pass
-            
+
             #Loop through the rows of the DataFrame
             for i, row in df.iterrows():
                 # Create an INSERT statement for each row
                 try:
-                    #insert_stmt = f"INSERT INTO table_name (column1, column2, column3) "f"VALUES ('{row['column1']}', '{row['column2']}', '{row['column3']}')"
+                    #insert_stmt = f"INSERT INTO TABLE_NAME (column1, column2, column3) "f"VALUES ('{row['column1']}', '{row['column2']}', '{row['column3']}')"
                     insert_stmt = (f"INSERT INTO StockData ([Symbol], [Open], [High], [Low], [Close], [Volume], [Dividends], [Stock Splits], [ADX_14], [RSI_7], [DMP_14], [DMN_14], [STOCHk_14_3_3], [STOCHd_14_3_3], [MACD_12_26_9], [MACDh_12_26_9], [MACDs_12_26_9])" \
                             f"VALUES('{row['Symbol']}','{row['Open']}','{row['High']}','{row['Low']}','{row['Close']}','{row['Volume']}','{row['Dividends']}','{row['Stock Splits']}','{row['ADX_14']}','{row['RSI_7']}','{row['DMP_14']}','{row['DMN_14']}','{row['STOCHk_14_3_3']}','{row['STOCHd_14_3_3']}','{row['MACD_12_26_9']}' ,'{row['MACDh_12_26_9']}','{row['MACDs_12_26_9']}')"
                         )
-                    # insert_stmt = (f"INSERT INTO StockData ([Symbol],Date, [Open], [High], [Low], [Close])" \
-                    #         f"VALUES('{row['Symbol']}','{row['Date']}','{row['Open']}','{row['High']}','{row['Low']}','{row['Close']}')"
-                    #     ) 
-                    # Execute the INSERT statement
                     cursor.execute(insert_stmt)
                     logger2.debug('Insert complete')
                 except:
                     print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
                     logger2.warning('%s', sys.exc_info()[0])
-                    pass
+
                 #Commit the changes to the database
-                conn.commit()    
+                conn.commit()
     except:
         print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
         logger2.warning(sys.exc_info()[0])
-        pass
-
 print('\n', 'Post Insert')
-        
 
 spinner.stop()
 #print("Processing complete")
