@@ -138,15 +138,18 @@ stocklist = tuple_to_list(stocklist)
 stocklist = flatten(stocklist)
 logger1.debug('Stocklist Prep Comp.')
 
-#myapp.area2
+# myapp.area2
 # Process each stock ticker
 # Retrieve stock information for all NYSE stocks
 for stock in stocklist:
     try:
         #print("Ticker = {}".format(stock))
         logger1.info('Ticker = %s', stock)
-        ticker = yf.Ticker(stock)
-        df = ticker.history(period="1y")
+        ticker = yf.Ticker(stock).history(period="1y")
+        df = ticker
+        
+
+        
         last_row = df.iloc[-1]
         if last_row['Close'] >= 5 and last_row['Close'] <= 20:
             try:
@@ -157,6 +160,17 @@ for stock in stocklist:
                 rsi = df.ta.rsi(RSI_PERIOD)
                 df = pd.concat([df, adx, stoch, macd, rsi], axis=1)
                 df['Symbol'] = stock
+                
+                # get the date column
+                dates = df.index
+                # print the dates
+                # print(dates)
+                df['Date'] = dates
+                # print(df.columns)
+                # print ("The data types of each column are:")
+                # print(df.dtypes)
+                # print(df['Date'])
+                
             except:
                 print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
                 logger2.warning(sys.exc_info()[0])
@@ -166,8 +180,8 @@ for stock in stocklist:
                 # Create an INSERT statement for each row
                 try:
                     #insert_stmt = f"INSERT INTO TABLE_NAME (column1, column2, column3) "f"VALUES ('{row['column1']}', '{row['column2']}', '{row['column3']}')"
-                    insert_stmt = (f"INSERT INTO StockData ([Symbol], [Open], [High], [Low], [Close], [Volume], [Dividends], [Stock Splits], [ADX_14], [RSI_7], [DMP_14], [DMN_14], [STOCHk_14_3_3], [STOCHd_14_3_3], [MACD_12_26_9], [MACDh_12_26_9], [MACDs_12_26_9])" \
-                            f"VALUES('{row['Symbol']}','{row['Open']}','{row['High']}','{row['Low']}','{row['Close']}','{row['Volume']}','{row['Dividends']}','{row['Stock Splits']}','{row['ADX_14']}','{row['RSI_7']}','{row['DMP_14']}','{row['DMN_14']}','{row['STOCHk_14_3_3']}','{row['STOCHd_14_3_3']}','{row['MACD_12_26_9']}' ,'{row['MACDh_12_26_9']}','{row['MACDs_12_26_9']}')"
+                    insert_stmt = (f"INSERT INTO StockData ([Symbol], [Date], [Open], [High], [Low], [Close], [Volume], [Dividends], [Stock Splits], [ADX_14], [RSI_7], [DMP_14], [DMN_14], [STOCHk_14_3_3], [STOCHd_14_3_3], [MACD_12_26_9], [MACDh_12_26_9], [MACDs_12_26_9])" \
+                            f"VALUES('{row['Symbol']}','{row['Date']}','{row['Open']}','{row['High']}','{row['Low']}','{row['Close']}','{row['Volume']}','{row['Dividends']}','{row['Stock Splits']}','{row['ADX_14']}','{row['RSI_7']}','{row['DMP_14']}','{row['DMN_14']}','{row['STOCHk_14_3_3']}','{row['STOCHd_14_3_3']}','{row['MACD_12_26_9']}' ,'{row['MACDh_12_26_9']}','{row['MACDs_12_26_9']}')"
                         )
                     cursor.execute(insert_stmt)
                     logger2.debug('Insert complete')
