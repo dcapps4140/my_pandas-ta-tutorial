@@ -1,11 +1,11 @@
-import pyodbc, sys
+from datetime import datetime
+import pyodbc
+import sys
 import time
 import pandas_ta as ta
 import yfinance as yf
 import pandas as pd
-from yahoo_fin import stock_info as si
 from halo import Halo
-from datetime import datetime
 from termcolor import colored
 import logging
 
@@ -170,7 +170,7 @@ for stock in stocklist:
                     #     ) 
                     # Execute the INSERT statement
                     cursor.execute(insert_stmt)
-                    logger2.info('Insert complete')
+                    logger2.debug('Insert complete')
                 except:
                     print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
                     logger2.warning('%s', sys.exc_info()[0])
