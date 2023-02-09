@@ -1,5 +1,5 @@
 """This code is used to read an sql database create and write a
-Pandas DataFrame to a SQL database."""
+Pandas DataFrame to a SQL database. See improvement suggestions at end of code"""
 from datetime import datetime
 import time
 import sys
@@ -10,12 +10,16 @@ import yfinance as yf
 import pandas as pd
 from halo import Halo
 import pyodbc
+import itertools
+import os
 
 # set up logging to file - see previous section for more details
+script_dir = os.path.dirname(os.path.abspath(__file__))
+filename = os.path.join(script_dir, 'myapp.log')
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
-                    filename='/tmp/myapp.log',
+                    filename=filename,
                     filemode='w')
 # define a Handler which writes INFO messages or higher to the sys.stderr
 console = logging.StreamHandler()
@@ -58,9 +62,13 @@ def tuple_to_list(my_tuples):
     """Convert tuples to list of tuples"""
     return [list(x) for x in my_tuples]
 
+# def flatten(my_list):
+#     """Flatten list of tuples"""
+#     return [item for sublist in my_list for item in sublist]
+
 def flatten(my_list):
     """Flatten list of tuples"""
-    return [item for sublist in my_list for item in sublist]
+    return list(itertools.chain(*my_list))
 
 def database_exists(conn, db_name):
     """Does table exist?"""
@@ -123,6 +131,13 @@ if not table_exists(conn, TABLE_NAME_2):
     cursor.execute(table_create_sql)
     cursor.close()
 
+# Drop previous data from MSSQL DB
+row_drop_sql = "DELETE FROM [dbo].[StockData]"
+if table_exists(conn, TABLE_NAME_2):
+    cursor = conn.cursor()
+    cursor.execute(row_drop_sql)
+    cursor.commit()
+
 # Create an empty dataframe to store the stock information
 df = pd.DataFrame()
 
@@ -144,7 +159,7 @@ logger1.debug('Stocklist Prep Comp.')
 for stock in stocklist:
     try:
         #print("Ticker = {}".format(stock))
-        logger1.info('Ticker = %s', stock)
+        logger2.info('Ticker = %s', stock)
         ticker = yf.Ticker(stock).history(period="1y")
         df = ticker
         
@@ -164,12 +179,12 @@ for stock in stocklist:
                 # get the date column
                 dates = df.index
                 # print the dates
-                # print(dates)
+                logger2.debug('%s', dates)
                 df['Date'] = dates
-                # print(df.columns)
-                # print ("The data types of each column are:")
-                # print(df.dtypes)
-                # print(df['Date'])
+                logger2.debug('%s', df.columns)
+                logger2.debug("The data types of each column are:")
+                logger2.debug('%s', df.dtypes)
+                logger2.debug('%s', df['Date'])
                 
             except:
                 print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
@@ -213,3 +228,41 @@ end = time.time()
 # and end time in milli. secs
 print("The time of execution of above program is :",
     (((end-start) * 10**3)/1000)/60, "mins")
+
+"""The code could be improved in several ways:
+
+Naming Conventions:
+
+Use snake_case for variable and function names, for example, RSI_PERIOD instead of RSI_PERIOD.
+Use descriptive and meaningful names for variables, functions, and tables.
+Capitalize acronyms such as SQL in SERVER and DATABASE.
+Code organization:
+
+Group related functions and variables together, for example, all functions related to the database connection could be grouped together.
+Place imports at the top of the code to make it easier to find and manage.
+Move all functions into a separate module and import them where needed.
+Functionality:
+
+Function tuple_to_list could be simplified to use a list comprehension instead of a for loop.
+Function flatten could be simplified to use the itertools.chain method.
+
+Here's one way you can use the itertools.chain method to simplify the flatten function:
+
+import itertools
+
+def flatten(lst):
+    return list(itertools.chain(*lst))
+The itertools.chain method takes a number of iterables as arguments, and returns a single, flattened iterable. 
+In this case, we use the * operator to unpack the elements of the input list, which will allow us to pass each sublist as a separate argument to itertools.chain. 
+Finally, we wrap the result of itertools.chain in a call to list to convert the iterable to a list.
+
+Function database_exists and table_exists are almost identical, consider combining them into one function.
+Error handling:
+
+Add error handling to the code to catch and handle exceptions that might occur, for example, when connecting to the database.
+Use the built-in logging module to log error messages and other important information.
+Performance:
+
+Consider using the with statement when working with the database connection to automatically close the connection when done.
+Optimize the code by using vectorized operations and efficient data structures where possible.
+"""
