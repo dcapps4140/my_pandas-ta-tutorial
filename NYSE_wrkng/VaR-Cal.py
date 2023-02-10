@@ -50,7 +50,7 @@ PASSWORD = 'development'
 
 date = datetime.today().strftime('%Y-%m-%d-%H-%M')
 #weights = [0.25, 0.35, 0.40]
-weights = [0.02]
+weights = [1]
 confidence_level = 0.05
 
 # Define non-default RSI parameters
