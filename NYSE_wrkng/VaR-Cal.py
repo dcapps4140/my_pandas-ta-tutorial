@@ -179,7 +179,50 @@ for stock in stocklist:
         var = np.percentile(portfolio_returns, confidence_level * 100)
         # Output the results
         print("Value-at-Risk: {:.5f}".format(var))
+        
+        tdf = ticker
+        last_row = tdf.iloc[-1]
 
+        if last_row['Close'] >= 5 and last_row['Close'] <= 20:
+            try:
+                adx = ta.adx(tdf['High'], tdf['Low'], tdf['Close'])
+                adx = tdf.ta.adx()
+                stoch = ta.stoch(tdf['High'], tdf['Low'], tdf['Close'], 14, 3, 3)#STOCHk_14_3_3  STOCHd_14_3_3
+                macd = tdf.ta.macd(fast=FAST_PERIOD, slow=SLOW_PERIOD, signal=SIGNAL_PERIOD)#MACD_12_26_9  MACDh_12_26_9  MACDs_12_26_9
+                rsi = tdf.ta.rsi(RSI_PERIOD)
+                tdf = pd.concat([tdf, adx, stoch, macd, rsi], axis=1)
+                tdf['Symbol'] = stock
+                tdf['Returns'] = portfolio_returns
+                
+                # get the date column
+                dates = tdf.index
+                # print the dates
+                #logger2.debug('%s, %s', dates, portfolio_returns)
+                tdf['Date'] = dates
+                #logger2.debug('%s', tdf.columns)
+                #logger2.debug("The data types of each column are:")
+                #logger2.debug('%s', tdf.dtypes)
+                #logger2.debug('%s', tdf.tail(5))
+            except:
+                print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
+                logger2.warning(sys.exc_info()[0])
+
+            #Loop through the rows of the DataFrame
+            for i, row in tdf.iterrows():
+                # Create an INSERT statement for each row
+                try:
+                    #insert_stmt = f"INSERT INTO TABLE_NAME (column1, column2, column3) "f"VALUES ('{row['column1']}', '{row['column2']}', '{row['column3']}')"
+                    insert_stmt = (f"INSERT INTO StockData ([Symbol], [Date], [Open], [High], [Low], [Close], [Volume], [Dividends], [Stock Splits], [ADX_14], [RSI_7], [DMP_14], [DMN_14], [STOCHk_14_3_3], [STOCHd_14_3_3], [MACD_12_26_9], [MACDh_12_26_9], [MACDs_12_26_9], [Returns])" \
+                            f"VALUES('{row['Symbol']}','{row['Date']}','{row['Open']}','{row['High']}','{row['Low']}','{row['Close']}','{row['Volume']}','{row['Dividends']}','{row['Stock Splits']}','{row['ADX_14']}','{row['RSI_7']}','{row['DMP_14']}','{row['DMN_14']}','{row['STOCHk_14_3_3']}','{row['STOCHd_14_3_3']}','{row['MACD_12_26_9']}' ,'{row['MACDh_12_26_9']}','{row['MACDs_12_26_9']}','{row['Returns']}')"
+                        )
+                    cursor.execute(insert_stmt)
+                    logger2.debug('Insert complete')
+                except:
+                    print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
+                    logger2.warning('%s', sys.exc_info()[0])
+
+                #Commit the changes to the database
+                conn.commit()
     except:
         print('ES')
         print(sys.exc_info()[0], colored("Exception occurred!","red"), end='\r')
