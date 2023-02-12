@@ -1,5 +1,5 @@
 """This code is used to read an sql database create and write a
-Pandas DataFrame to a SQL database. See improvement suggestions at end of code"""
+Pandas DataFrame to a SQL database."""
 from datetime import datetime
 import time
 import sys
@@ -138,7 +138,7 @@ if not table_exists(conn, TABLE_NAME_2):
 # Drop previous data from MSSQL DB
 row_drop_sql = "DELETE FROM [dbo].[StockData]"
 if table_exists(conn, TABLE_NAME_2):
-    cursor = conn.cursor()
+    #cursor = conn.cursor()
     cursor.execute(row_drop_sql)
     cursor.commit()
 
@@ -247,5 +247,3 @@ end = time.time()
 # and end time in milli. secs
 print("The time of execution of above program is :",
     (((end-start) * 10**3)/1000)/60, "mins")
-
-# print the difference between start
