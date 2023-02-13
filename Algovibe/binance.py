@@ -1,45 +1,35 @@
 #!/usr/bin/env python
 # coding: utf-8
-import sqlalchemy
+Import websocket
+import json
 import pandas as pd
-from binance.client import Client
-import os
 
-api_key = os.environ.get("API_KEY")
-api-secret = os.environ.get("API_KEY_SK")
+endpoint = 'wss://stream.binance.com:9443/ws'
 
-client = Client('api-key', 'api-secret')
+our_msg = json.dumps({'method':'SUBSCRIBE', 'params':['btcusdt@ticker'],'id':1})
 
-engine = sqlalchemy.create_engine('sqlite:///BTCUSDTsream.db')
+df = pd.DataFrame()
+in_position = False
 
-df = pd.read_sql('BTCUSDT', engine)
+def on_open(ws):
+		ws.send(our_msg)
 
-df
+def on_message(ws, message):
+			global df, in_position
+			out = json.loads(message)
+			out = pd.DataFrame({'price':float(out['c'])}, index=[pd.to_datetime(out['E'],units='ms')})
+			df = pd.concat([df,out],axis=0)
+			print(df)
+			df = df.tail(5)
+			last_price = df.tail(1).price.values[0]
+			sma_5 = df.price.rolling(5).mean().tail(1).values[0]
+			if not in_position and last_price > sma_5:
+						print('bought for '+ str(last_price))
+						in_position = True
+			if in_position and sma_5 > last_price
+						print('sold for '+ str(last_price))
+						in_position = False
 
-df.Price.plot()
+ws = websocket.WebSocketApp(endpoint, on_message=on_message, on_open=on_open)
 
-def strategy(entry, lookback, qty, open_position=False):
-    while True: 
-        df = pd.read_sql('BTCUSDT', engine)
-        lookbackperiod = df.iloc[-lookback:] #vriskei to pio palio timestamp
-        cumret = (lookbackperiod.Price.pct_change() +1).cumprod()-1 #cummulative return, h teleutaia timh toy coin
-        if not open_position:
-            if cumret[cumret.last_valid_index()] > entry: #check an to cummylative return > entry price
-                order = client.create_order(symbol='BTCUSDT', side = 'BUY', type = 'MARKET' , quantity=qty)
-                print(order)
-                open_position = True
-                break
-    if open_position:
-        while True:
-            df = pd.read_sql('BTCUSDT', engine)
-            sincebuy = df.loc[df.Time > pd.to_datetime(order['transactTime'],unit='ms')] #filter gia mono ton xrono ap ton opoio agorasame to asset kai meta
-            
-            if len(sincebuy) > 1: 
-                sincebuyret = (sincebuy.Price.pct_change() +1).cumprod()-1 #o typos gia na dw thn epistrofh poy exw, idios me panw
-                last_entry = sincebuyret[sincebuyret.last_valid_index()]
-                if last_entry > 0.0015 or last_entry < -0.0015:
-                    order = client.create_order(symbol='BTCUSDT', side = 'BUY', type = 'MARKET' , quantity=qty)
-                    print(order)
-                    break
-
-strategy(0.001, 60, 0.001)
+ws.run_forever()
