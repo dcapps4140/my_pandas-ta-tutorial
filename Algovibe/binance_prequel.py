@@ -1,28 +1,27 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 import json
-import pandas as pd
-import websocket_client as websocket
+import os
+import websocket
 
-endpoint = 'wss://stream.binance.com:9443/ws'
+
+# Get the value of an environment variable
+API_KEY = os.environ.get('API_KEY')
+API_KEY_SK = os.environ.get('API_KEY_SK')
+print(API_KEY, API_KEY_SK)
+
+END_POINT = 'wss://stream.binance.us:9443/ws'
 
 our_msg = json.dumps({'method':'SUBSCRIBE', 'params':['btcusdt@ticker'],'id':1})
 
-
 def on_open(ws):
-		ws.send(our_msg)
+	'''This is the callback function that will be called when the connection is opened'''
+	ws.send(our_msg)
 
 def on_message(ws, message):
-			
-			out = json.loads(message)
-			
-			print(df)
+	'''This is the callback function that will be called when a message is received'''
+	out = json.loads(message)
+	print(out)
 
-
-ws = websocket.create_connection(endpoint)
-ws.send(our_msg)
-
-while True:
-    result = ws.recv()
-    on_message(ws, result)
+ws = websocket.WebSocketApp(END_POINT, on_message=on_message, on_open=on_open)
+ws.run_forever()
