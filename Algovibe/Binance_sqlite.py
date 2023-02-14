@@ -19,6 +19,3 @@ async def main():
     print(msg)
     
 main()
-#%%
-
-#%%
