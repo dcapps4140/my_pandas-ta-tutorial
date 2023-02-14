@@ -4,8 +4,8 @@ from binance.client import Client
 from binance import BinanceSocketManager
 import os
 
-os.environ['API_KEY'] = 'QiUbdlK0KehGdgOJxokt7rO2OwGP8wjAQkHb8mVeGmgkccmgauOFmn5TV3tX8FMS'
-os.environ['API_KEY_SK'] = 'NgQTQjNNnBbD8WMWR3MTRlb5aEgkk4rRabKCOzFZdJIL16tibgxJEc8c9yrZelKu'
+API_KEY = 'QiUbdlK0KehGdgOJxokt7rO2OwGP8wjAQkHb8mVeGmgkccmgauOFmn5TV3tX8FMS'
+API_KEY_SK = 'NgQTQjNNnBbD8WMWR3MTRlb5aEgkk4rRabKCOzFZdJIL16tibgxJEc8c9yrZelKu'
 
 client = Client(API_KEY, API_KEY_SK)
 
@@ -19,3 +19,6 @@ async def main():
     print(msg)
     
 main()
+#%%
+
+#%%
