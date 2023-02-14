@@ -7,22 +7,22 @@ API_KEY = os.environ.get('API_KEY')
 API_KEY_SK = os.environ.get('API_KEY_SK')
 print(API_KEY, API_KEY_SK)
 
-DF = pd.DataFrame()
-IN_POSITION = False
-BUY_ORDERS, SELL_ORDERS = [], []
-
 END_POINT = 'wss://stream.binance.us:9443/ws'
 
 our_msg = json.dumps({'method':'SUBSCRIBE', 'params':['btcusdt@ticker'],'id':1})
+
+DF = pd.DataFrame()
+IN_POSITION = False
+BUY_ORDERS, SELL_ORDERS = [], []
 
 def on_open(ws):
     '''This is the callback function that will be called when the connection is opened'''
     ws.send(our_msg)
 
 def on_message(ws, message):
-    global	DF, IN_POSITION
+    global	DF, IN_POSITION, BUY_ORDERS, SELL_ORDERS
     out = json.loads(message)
-    out = pd.DataFrame({'price':float(out['c'])}, index=[pd.to_datetime(out['E'], units='ms')])
+    out = pd.DataFrame({'price': [float(out['c'])]}, index=[pd.to_datetime(out['E'], units='ms')])
     DF = pd.concat([DF,out],axis=0)
     print(DF)
     DF = DF.tail(5)
