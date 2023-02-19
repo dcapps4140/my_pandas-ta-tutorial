@@ -20,8 +20,8 @@ def on_open(ws):
 
 def on_message(ws, message):
 	'''This is the callback function that will be called when a message is received'''
-	out = json.loads(message)
-	print(out)
+	data = json.loads(message)
+	print(data)
 
 ws = websocket.WebSocketApp(END_POINT, on_message=on_message, on_open=on_open)
 ws.run_forever()
