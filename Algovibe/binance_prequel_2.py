@@ -4,7 +4,7 @@ import json
 import os
 import websocket
 import ta
-from ta.momentum import rsi
+#from ta.momentum import rsi
 #from ta.trend import sma_indicator
 import pandas as pd
 
@@ -40,7 +40,7 @@ def on_message(ws, message):
     new_df = createframe(data)
     df_list.append(new_df)
     df = pd.concat(df_list, ignore_index=True)
-    df['rsi'] = ta.momentum.rsi(df['close'], window=14, fillna=False)
+    #df['rsi'] = ta.momentum.rsi(df['close'], window=14, fillna=False)
    # df['sma'] = ta.trend.sma_indicator(df['close'], window=12, fillna=False)
     df = df.tail(15)
     print(df)
