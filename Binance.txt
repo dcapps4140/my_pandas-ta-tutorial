@@ -2,3 +2,14 @@ DAC_Mine
 
 api_key hMQ4eASBPOBBqfS7hAMR442rPsdHr5lKfMj9ilO5an84OXrRhlrVC0PONmmymQaz
 api_key_secret - nge7VCCxgf0Hz0gFJumcy3xxqmbvKwrSTLCMiMfnM4HjCSEe7JIMZLV0pmffiro8
+
+
+An error occurred: APIError(code=-1003): Way too much request weight used; 
+IP banned until 1676790167082. 
+Please use the websocket for live updates to avoid bans.
+
+  #from ta.momentum import rsi
+#from ta.trend import sma_indicator
+
+  #df['rsi'] = ta.momentum.rsi(df['close'], window=14, fillna=False)
+   # df['sma'] = ta.trend.sma_indicator(df['close'], window=12, fillna=False)
