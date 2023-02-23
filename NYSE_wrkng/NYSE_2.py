@@ -3,7 +3,7 @@ Pandas DataFrame to a SQL database. See improvement suggestions at end of code""
 from datetime import datetime
 import time
 import sys
-import logging
+
 from termcolor import colored
 import pandas_ta as ta
 import yfinance as yf
